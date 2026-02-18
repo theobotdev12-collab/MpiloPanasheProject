@@ -7,6 +7,8 @@ import json
 from tensorflow.keras.preprocessing import image
 import os
 import uuid
+import gdown
+import zipfile
 
 # ======================
 # Flask setup
@@ -19,6 +21,28 @@ app = Flask(
 )
 
 CORS(app)
+
+# ======================
+# Download dataset from Google Drive if not exists
+# ======================
+
+DATASET_DIR = "data/local_food_dataset"
+DATASET_URL = "https://drive.google.com/drive/folders/1x_7Sh5IxaamoBAnWWBdXpYdOfRLPQ4i5?usp=drive_link"  # <-- Replace with your Google Drive zip link
+
+if not os.path.exists(DATASET_DIR):
+    print("Downloading local_food_dataset from Google Drive...")
+    os.makedirs(DATASET_DIR, exist_ok=True)
+
+    # Download the zip
+    gdown.download(DATASET_URL, "local_food_dataset.zip", quiet=False)
+
+    # Extract the zip
+    with zipfile.ZipFile("local_food_dataset.zip", "r") as zip_ref:
+        zip_ref.extractall(DATASET_DIR)
+
+    # Remove the zip
+    os.remove("local_food_dataset.zip")
+    print("Dataset downloaded and extracted successfully.")
 
 # ======================
 # Load model & data
@@ -108,16 +132,13 @@ def predict():
     file = request.files["file"]
 
     try:
-        # Save temp file
         filename = f"{uuid.uuid4()}.jpg"
         filepath = os.path.join(".", filename)
         file.save(filepath)
 
-        # Run AI prediction
         food, confidence = predict_food(filepath)
         nutrients = get_nutrients(food)
 
-        # Remove temp file
         os.remove(filepath)
 
         if nutrients is None:
@@ -141,29 +162,17 @@ def predict():
         print("ERROR:", str(e))
         return jsonify({"error": str(e)}), 500
 
-
 # ======================
-# SPA ROUTING (VERY IMPORTANT)
+# SPA ROUTING (React)
 # ======================
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_react(path):
-    """
-    Serves static files if they exist,
-    otherwise serves React index.html
-    for client-side routing.
-    """
-
     full_path = os.path.join(app.static_folder, path)
-
-    # Serve static files (JS, CSS, images, etc.)
     if path != "" and os.path.exists(full_path):
         return send_from_directory(app.static_folder, path)
-
-    # Otherwise serve React app
     return send_from_directory(app.static_folder, "index.html")
-
 
 # ======================
 # Run server
