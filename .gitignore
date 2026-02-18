@@ -1,0 +1,25 @@
+# Virtual environment
+mpilo_env/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Model files
+*.h5
+*.pkl
+*.pt
+*.joblib
+
+# Dataset files
+*.csv
+*.zip
+*.xlsx
+
+# VSCode
+.vscode/
+
+# OS files
+.DS_Store

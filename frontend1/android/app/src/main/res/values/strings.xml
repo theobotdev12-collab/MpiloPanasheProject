@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">impilo-kidney-care</string>
+    <string name="title_activity_main">impilo-kidney-care</string>
+    <string name="package_name">com.mpilopanashe.app</string>
+    <string name="custom_url_scheme">com.mpilopanashe.app</string>
+</resources>
